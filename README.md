@@ -26,7 +26,7 @@ The macro uses pre-existing plugins in some of its function which need to be ins
 
 •	If ROI segmentation is done via Stardist, Stardist also needs to be added to the list of update sites.
 
-•	If ROI segmentation is done via Stardist, a Stardist model is needed.
+•	If ROI segmentation is done via Stardist, a Stardist model is needed. mESCs models are available in the "stardist_models" folder.
 
 •	To measure colocalization, the macro uses the EZcolocalization plugin. The plugin can be downloaded from https://github.com/DrHanLim/EzColocalization and moved to the plugin folder of Fiji.
 
