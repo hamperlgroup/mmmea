@@ -47,7 +47,9 @@ KNOWN ISSUES
 AUTHORS
 
 Maxime Lalonde, main author
+
 Manuel Trauner, contributor
+
 Andreas Ettinger, contributor
 
 
