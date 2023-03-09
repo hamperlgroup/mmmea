@@ -1,4 +1,4 @@
-scriptVersion="20230223_MMMEA_v3.0";
+scriptVersion="20230309_MMMEA_v3.1";
 
 //tested on ImageJ version 1.53o
 
@@ -84,6 +84,9 @@ scriptVersion="20230223_MMMEA_v3.0";
 //added the possibility to save 1 image each X images (pngtile, ROI pre/postg filter, Tiff, Mask images)
 //separated the EZcolocalization function in 2 (to separate the measurment of an additional EZcoloc in a different function). Diminish the number of variable to transfer to the function
 //EZcolocalization function now do not save the ROIzip file. The saving of the ROizip file now happen outside the function
+//20230309_MMMEA_v3.1
+//fixed the coloredROIimage function to adjust size of images depending on starting image format (works now on 2048*2048 images)
+//made the result and the EZcolocalization images open outside of the screen to reduce interference with other computer work
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---
@@ -1280,7 +1283,15 @@ for (k = 0; k < numberOfFiles; k++) {
 		channelsArray = Array.deleteValue(channelsArray, 0);
 		//get the number of Zplane
 		ZplaneNumber = slices;
-run("Select None");
+
+		//hide the Results table off screen
+		if (imagecount == 0) {
+			run("Measure");
+			selectWindow("Results");
+			Table.setLocationAndSize((screenWidth+100), (screenHeight+100), 500, 200);
+		}
+		//Table.setLocationAndSize(100, 100, 500, 200);
+
 // ------------------------
 // find plain in best focus
 // ------------------------
@@ -1392,17 +1403,23 @@ run("Select None");
 
 				//to work on a projection
 				if (allZ == "max proj") {
+					selectWindow("nFocus");
+					close();
 					selectWindow("Hyperstack");
-					run("Z Project...", "projection=[Max Intensity]");
+					run("Z Project...", "projection=[Max Intensity]");					
 					rename("nFocus");
 					nFocus = 1;
 					if (proj) {
 						// save projection image
+						run("Duplicate...", "duplicate");
 						saveAs("Tiff", projDir+imgName+"_projection.tiff");
+						close();
 					}
 				}
 
 				if (allZ == "sum proj") {
+					selectWindow("nFocus");
+					close();
 					selectWindow("Hyperstack");
 					run("Z Project...", "projection=[Sum Slices]");
 					rename("nFocus");
@@ -1410,10 +1427,13 @@ run("Select None");
 					if (proj) {
 						// save projection image
 						saveAs("Tiff", projDir+imgName+"_projection.tiff");
+						close();
 					}
 				}
 
 				if (allZ == "mean proj") {
+					selectWindow("nFocus");
+					close();
 					selectWindow("Hyperstack");
 					run("Z Project...", "projection=[Average Intensity]");
 					rename("nFocus");
@@ -1421,10 +1441,13 @@ run("Select None");
 					if (proj) {
 						// save projection image
 						saveAs("Tiff", projDir+imgName+"_projection.tiff");
+						close();
 					}
 				}
 
 				if (allZ == "SD proj") {
+					selectWindow("nFocus");
+					close();
 					selectWindow("Hyperstack");
 					run("Z Project...", "projection=[Standard Deviation]");
 					rename("nFocus");
@@ -1432,10 +1455,13 @@ run("Select None");
 					if (proj) {
 						// save projection image
 						saveAs("Tiff", projDir+imgName+"_projection.tiff");
+						close();
 					}
 				}
 
 				if (allZ == "median proj") {
+					selectWindow("nFocus");
+					close();
 					selectWindow("Hyperstack");
 					run("Z Project...", "projection=[Median]");
 					rename("nFocus");
@@ -1443,6 +1469,7 @@ run("Select None");
 					if (proj) {
 						// save projection image
 						saveAs("Tiff", projDir+imgName+"_projection.tiff");
+						close();
 					}
 				}
 
@@ -1671,20 +1698,18 @@ run("Select None");
 							if (nROIs>=1){
 								EZ(ch1, ch2, EZmeth1, threshMeth1, prominence1, EZmeth2, threshMeth2, prominence2, Masks, MaskImageDir, imgName, dows, ROIminarea, ROImaxarea, ExpIdent, logFilePath, imgSave);
 							}
-waitForUser;
 
 							if (addEZ == 1) {
 								secEZ(addch1, addch2, addEZmeth1, addthreshMeth1, addprominence1, addEZmeth2, addthreshMeth2, addprominence2, Masks, MaskImageDir, imgName, dows, ROIminarea, ROImaxarea, ExpIdent, logFilePath, imgSave);
 							}
 						}
 
-waitForUser;
 // -----------------------------------------------------------------------------
 // Standardize ROI names (important because EZcolocalization modifies ROI names)
 // -----------------------------------------------------------------------------
 
 						nROIs = roiManager("count");
-						if (nROIs>=1){
+						if (nROIs>=1) {
 							if (Coloc) {
 
 								//EZcolocalization already renamed ROIs with the following nomenclature
@@ -1738,7 +1763,7 @@ waitForUser;
 							//save the ROImanager
 							roiManager("Save", ROIzipDir+imgName+"_RoiSet.zip");
 
-waitForUser;
+
 // ------------------------------------
 // Measure standard parameters per ROIs
 // ------------------------------------
@@ -1878,7 +1903,6 @@ waitForUser;
 									kurtosisArray[j] = getResult("Kurt");
 								}
 
-waitForUser;
 // -----------------------------------------
 // count Foci using the 'Maxima Finder' tool
 // -----------------------------------------
@@ -1901,7 +1925,6 @@ waitForUser;
 									}
 								}
 
-waitForUser;
 // -----------------------------
 // save Coloc results in strings
 // -----------------------------
@@ -2200,7 +2223,7 @@ function list_files(dir, type, rec) {
 		} else if (rec) {
 			// if identified as folder, continue
 			if (endsWith(currentPath, File.separator)) {
-				if (indexOf(currentPath, "MMMEAresults") >= 0) {
+				if (indexOf(currentPath, "MMMEAresults") <= 0) {
 					// apply original function to the subfolder and save in arr2
            			arr2 = list_files(""+currentPath, type, true);
            			// append arr2 to arr
@@ -3135,6 +3158,7 @@ function EZ(ch1, ch2, EZmeth1, threshMeth1, prominence1, EZmeth2, threshMeth2, p
 	if(isOpen("Metric(s) of ROI Manager")) {
 		//rename result window to be able to retrieve data later
 		selectWindow("Metric(s) of ROI Manager");
+		Table.setLocationAndSize((screenWidth+100), (screenHeight+100), 500, 200);
 		Table.rename("Metric(s) of ROI Manager", ExpIdent+"_ch1ch2");
 	} else {
 		//if there is no output from EZcolocalization, take note of it
@@ -3150,7 +3174,9 @@ function EZ(ch1, ch2, EZmeth1, threshMeth1, prominence1, EZmeth2, threshMeth2, p
 	}
 	if(isOpen("Metric(s) of ROI Manager")) {
 		//rename result window to be able to retrieve data later
-		selectWindow("Metric(s) of ROI Manager");		Table.rename("Metric(s) of ROI Manager", ExpIdent+"_ch2ch1");
+		selectWindow("Metric(s) of ROI Manager");		
+		Table.setLocationAndSize((screenWidth+100), (screenHeight+100), 500, 200);
+		Table.rename("Metric(s) of ROI Manager", ExpIdent+"_ch2ch1");
 	} else {
 		//if there is no output from EZcolocalization, take note of it
 		File.append(imgName+" ch2-ch1 coloc analysis not done, EZcolocalization unable to quantify colocalization ", logFilePath);
@@ -3338,6 +3364,7 @@ function secEZ(addch1, addch2, addEZmeth1, addthreshMeth1, addprominence1, addEZ
 	if(isOpen("Metric(s) of ROI Manager")){
 		//rename result window to be able to retrieve data later
 		selectWindow("Metric(s) of ROI Manager");
+		Table.setLocationAndSize((screenWidth+100), (screenHeight+100), 500, 200);
 		Table.rename("Metric(s) of ROI Manager", ExpIdent+"_addch1addch2");
 	} else {
 		//if there is no output from EZcolocalization, take note of it
@@ -3351,9 +3378,10 @@ function secEZ(addch1, addch2, addEZmeth1, addthreshMeth1, addprominence1, addEZ
 	} else {
 		run("EzColocalization ", "reporter_1_(ch.1)=addch2 reporter_2_(ch.2)=addch1 cell_identification_input=[ROI Manager] alignthold4=default dows filter1=area range1="+ROIminarea+"-"+ROImaxarea+" tos metricthold1=costes' allft-c1-1=10 allft-c2-1=10 pcc metricthold2=costes' allft-c1-2=10 allft-c2-2=10 srcc metricthold3=costes' allft-c1-3=10 allft-c2-3=10 icq metricthold4=costes' allft-c1-4=10 allft-c2-4=10 mcc metricthold5=costes' allft-c1-5=10 allft-c2-5=10 average_signal");
 	}
-	if(isOpen("Metric(s) of ROI Manager")){
+	if(isOpen("Metric(s) of ROI Manager")) {
 		//rename result window to be able to retrieve data later
 		selectWindow("Metric(s) of ROI Manager");
+		Table.setLocationAndSize((screenWidth+100), (screenHeight+100), 500, 200);
 		Table.rename("Metric(s) of ROI Manager", ExpIdent+"_addch2addch1");
 	} else {
 		//if there is no output from EZcolocalization, take note of it
@@ -3463,7 +3491,7 @@ function pngtile(colorChoices,colorArray,MontageMinArray,MontageMaxArray,pngtile
 	}
 
 
-roiManager("Set Color", "white");
+	roiManager("Set Color", "white");
 	roiManager("Set Line Width", 3);
 
 	//draw ROIs if option selected
@@ -3555,8 +3583,8 @@ roiManager("Set Color", "white");
 		//flatten the scale bar
 		run("Flatten");
 		wait(100);
-selectWindow("Results");
-run("Close");
+	selectWindow("Results");
+	run("Close");
 		//close unflatten image
 		selectImage("Montage");
 		close();
@@ -3567,5 +3595,4 @@ run("Close");
 	//save montage in pngDir
 	selectImage("Montage");
 	saveAs("png", pngDir+imgName+"_montage");
-}
-
+}
