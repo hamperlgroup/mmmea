@@ -1,4 +1,4 @@
-# mmmea
+# MMMEA
 
 ABOUT
 
@@ -24,7 +24,7 @@ The macro uses pre-existing plugins in some of its function which need to be ins
 
 •	To open images, the macro uses Bio-formats which needs to be added to the list of update sites of Fiji (Help/Update…/Manage update sites).
 
-•	If ROI segmentation is done via Stardist, Stardist also needs to be added to the list of update sites.
+•	If ROI segmentation is done via Stardist (https://github.com/stardist/stardist), Stardist also needs to be added to the list of update sites.
 
 •	If ROI segmentation is done via Stardist, a Stardist model is needed. mESCs models are available in the "stardist_models" folder.
 
