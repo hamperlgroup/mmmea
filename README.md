@@ -26,7 +26,7 @@ The macro uses pre-existing plugins in some of its function which need to be ins
 
 •	If ROI segmentation is done via Stardist (https://github.com/stardist/stardist), Stardist also needs to be added to the list of update sites.
 
-•	If ROI segmentation is done via Stardist, a Stardist model is needed. mESCs models are available in the "stardist_models" folder.
+•	If ROI segmentation is done via Stardist, a Stardist model is needed. mESCs models are available in the "stardist_models" folder. The models shared have been trained on mESCs-segmented nuclei using a sirDNA far-red DNA dye or using a RNAPIIpS2 antibody. Images were acquired using a Nikon T2 inverted microscope with an Andor Dragonfly spinning disk, combined with a 40X air objective and an iXon Life 888 EMCCD camera.
 
 •	To measure colocalization, the macro uses the EZcolocalization plugin. The plugin can be downloaded from https://github.com/DrHanLim/EzColocalization and moved to the plugin folder of Fiji.
 
