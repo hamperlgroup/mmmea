@@ -2954,12 +2954,16 @@ function ROIZpositionfilter(outofFocusROIChannel, nFocus, Zdifferential, Ratioli
 		Stack.setChannel(outofFocusROIChannel);
 		// loop throught ROIs to measure intensity above and under of each one
 		for (i = nROIs-1; i >= 0; i--) {
+			//deleted will become 1 once an ROI is deleted. Needed later in the function. Resets for each ROI.
+			deleted = 0;
 			roiManager("Select", i);
 			Stack.setSlice(nFocus);
 			run("Measure");
 			ROIintensity = getResult("IntDen");
 
 			//find the Z limit for this function
+			//(if the nFocus is the 1st Zplane, do not check for Zplanes below)
+			//z1 is the upper Zstack limit and z2 is the lower Zstack limit that allow measurements in this function
 			z1 = ZplaneNumber-Zdifferential;
 			z2 = Zdifferential;
 			if (nFocus <z1) {
@@ -2982,12 +2986,16 @@ function ROIZpositionfilter(outofFocusROIChannel, nFocus, Zdifferential, Ratioli
 				if (OverRatio > Ratiolimit) {
 					roiManager("Select", i);
 					roiManager("delete");
+					//deleted becomes 1 to avoid the cases where the function would want to delete an ROI because over Over and Under Ratios
+					deleted = 1;
 				}
 			}
-			if (nFocus > z2) {
-				if (UnderRatio > Ratiolimit) {
-					roiManager("Select", i);
-					roiManager("delete");
+			if (deleted = 0) {
+				if (nFocus > z2) {
+					if (UnderRatio > Ratiolimit) {
+						roiManager("Select", i);
+						roiManager("delete");
+					}
 				}
 			}
 		}
