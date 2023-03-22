@@ -2990,7 +2990,7 @@ function ROIZpositionfilter(outofFocusROIChannel, nFocus, Zdifferential, Ratioli
 					deleted = 1;
 				}
 			}
-			if (deleted = 0) {
+			if (deleted == 0) {
 				if (nFocus > z2) {
 					if (UnderRatio > Ratiolimit) {
 						roiManager("Select", i);
