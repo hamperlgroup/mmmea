@@ -1781,7 +1781,6 @@ for (k = 0; k < numberOfFiles; k++) {
 							//save the ROImanager
 							roiManager("Save", ROIzipDir+imgName+"_RoiSet.zip");
 
-exit;
 // ------------------------------------
 // Measure standard parameters per ROIs
 // ------------------------------------
