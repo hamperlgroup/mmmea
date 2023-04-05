@@ -1,4 +1,4 @@
-scriptVersion="20230309_MMMEA_v3.1";
+scriptVersion="20230405_MMMEA_v3.2";
 
 //tested on ImageJ version 1.53o
 
@@ -87,6 +87,8 @@ scriptVersion="20230309_MMMEA_v3.1";
 //20230309_MMMEA_v3.1
 //fixed the coloredROIimage function to adjust size of images depending on starting image format (works now on 2048*2048 images)
 //made the result and the EZcolocalization images open outside of the screen to reduce interference with other computer work
+//20230405_MMMEA_v3.2
+//fixed the standardize ROI naming section to remove NaN values generated when using a Z projection
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---
@@ -1403,6 +1405,8 @@ for (k = 0; k < numberOfFiles; k++) {
 
 				//to work on a projection
 				if (allZ == "max proj") {
+					//proj value is used to identify if a projection of any kind has been used. proj value used in the "Standardize ROI names" section
+					proj = 1;
 					selectWindow("nFocus");
 					close();
 					selectWindow("Hyperstack");
@@ -1418,6 +1422,8 @@ for (k = 0; k < numberOfFiles; k++) {
 				}
 
 				if (allZ == "sum proj") {
+					//proj value is used to identify if a projection of any kind has been used. proj value used in the "Standardize ROI names" section
+					proj = 1;
 					selectWindow("nFocus");
 					close();
 					selectWindow("Hyperstack");
@@ -1432,6 +1438,8 @@ for (k = 0; k < numberOfFiles; k++) {
 				}
 
 				if (allZ == "mean proj") {
+					//proj value is used to identify if a projection of any kind has been used. proj value used in the "Standardize ROI names" section
+					proj = 1;
 					selectWindow("nFocus");
 					close();
 					selectWindow("Hyperstack");
@@ -1446,6 +1454,8 @@ for (k = 0; k < numberOfFiles; k++) {
 				}
 
 				if (allZ == "SD proj") {
+					//proj value is used to identify if a projection of any kind has been used. proj value used in the "Standardize ROI names" section
+					proj = 1;
 					selectWindow("nFocus");
 					close();
 					selectWindow("Hyperstack");
@@ -1460,6 +1470,8 @@ for (k = 0; k < numberOfFiles; k++) {
 				}
 
 				if (allZ == "median proj") {
+					//proj value is used to identify if a projection of any kind has been used. proj value used in the "Standardize ROI names" section
+					proj = 1;
 					selectWindow("nFocus");
 					close();
 					selectWindow("Hyperstack");
@@ -1742,6 +1754,12 @@ for (k = 0; k < numberOfFiles; k++) {
 										PreviousSlice = Slice;
 										cell = 1;
 									}
+									
+									//when doing a Z projection, the Z position is lost and the result of the getResult("Slice") command gives "NaN" values
+									//replace them by "1" because I dislike NaNs 
+									if (proj == 1){
+										Slice = 1;
+									}
 
 									roiManager("Rename", "image "+Slice+": cell "+cell);
 								}
@@ -1763,7 +1781,7 @@ for (k = 0; k < numberOfFiles; k++) {
 							//save the ROImanager
 							roiManager("Save", ROIzipDir+imgName+"_RoiSet.zip");
 
-
+exit;
 // ------------------------------------
 // Measure standard parameters per ROIs
 // ------------------------------------
