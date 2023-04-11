@@ -1405,6 +1405,8 @@ for (k = 0; k < numberOfFiles; k++) {
 // projections
 // -----------------------------------------------
 
+				//proj value is used to identify if a projection of any kind has been used. proj value used in the "Standardize ROI names" section
+				pr = 0;
 				//to work on a projection
 				if (allZ == "max proj") {
 					//proj value is used to identify if a projection of any kind has been used. proj value used in the "Standardize ROI names" section
