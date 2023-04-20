@@ -749,7 +749,7 @@ if (Import) {
 	Dialog.create("Settings 3/5:");
 	Dialog.addMessage("-------------------- Filters settings --------------------");
 	Dialog.addNumber("ROI minimum size:", 30);
-	Dialog.addNumber("ROI minimum size:", 450);
+	Dialog.addNumber("ROI maximum size:", 450);
 	Dialog.addCheckbox("Filter on IntDen?", false);
 	Dialog.addString("on which channel(s) (;)", "1;2;3");
 	Dialog.addMessage("                             ***if you want to keep ROIs above a value, select '>' ***");
