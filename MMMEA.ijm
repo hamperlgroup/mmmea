@@ -1749,28 +1749,42 @@ for (k = 0; k < numberOfFiles; k++) {
 										
 								} else {
 									
-									//Get the Zplane of the first ROI to track changes in Z planes to be able to change the "image" number in the ROI naming
-									roiManager("Select", 0);
-									roiManager("Measure");
-									PreviousSlice = getResult("Slice");
-									//initialize the cell numbering at 0
-									cell = 0;
-	
-									for (i = 0; i < nROIs; i ++) {
-										//Get the Zplane of the ROI
-										roiManager("Select", i);
-										roiManager("Measure");
-										Slice = getResult("Slice");
-										//if the Zplane is the same as the previous ROI, add 1 to the cell number,
-										//if not, reinitialize the cell numbering at 1 and actualize the PreviousSlice parameter
-										if (Slice == PreviousSlice) {
+									//if you have only 1Z, use a Zplane value of 1 by default and just number the cells
+									if (ZplaneNumber == 1) {
+										
+										//initialize the cell numbering at 0
+										cell = 0;
+										for (i = 0; i < nROIs; i ++) {
 											cell = cell + 1;
-										} else {
-											PreviousSlice = Slice;
-											cell = 1;
-										}
+											roiManager("Select", i);
+											roiManager("Rename", "image 1: cell "+cell);
+										}	
+										
+									} else {
+																
+										//Get the Zplane of the first ROI to track changes in Z planes to be able to change the "image" number in the ROI naming
+										roiManager("Select", 0);
+										roiManager("Measure");
+										PreviousSlice = getResult("Slice");
+										//initialize the cell numbering at 0
+										cell = 0;
+		
+										for (i = 0; i < nROIs; i ++) {
+											//Get the Zplane of the ROI
+											roiManager("Select", i);
+											roiManager("Measure");
+											Slice = getResult("Slice");
+											//if the Zplane is the same as the previous ROI, add 1 to the cell number,
+											//if not, reinitialize the cell numbering at 1 and actualize the PreviousSlice parameter
+											if (Slice == PreviousSlice) {
+												cell = cell + 1;
+											} else {
+												PreviousSlice = Slice;
+												cell = 1;
+											}
 
-										roiManager("Rename", "image "+Slice+": cell "+cell);
+											roiManager("Rename", "image "+Slice+": cell "+cell);
+										}
 									}
 								}
 							}
