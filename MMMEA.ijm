@@ -2172,7 +2172,7 @@ for (k = 0; k < numberOfFiles; k++) {
 		// ((t2 - t1) / (imagecount)) ---> time spent so far/ number of images processed so far ---> time spent per images
 		//(timeNumber - (imagecount)) ---> total number of images to process - number of image already processed
 		// ((t2 - t1) / (imagecount)) * (timeNumber - (imagecount)) ---> number of time to process 1 image * number of images remaining ---> number of time left
-		duration = ((t2 - t1) / (imagecount)) * (timeNumber - (imagecount)) / 60000;
+		duration = ((t2 - t1) / (imagecount)) * ((timeNumber) - (imagecount)) / 60000;
 		if (k == 0) {
 			print("-/-");
 		}
