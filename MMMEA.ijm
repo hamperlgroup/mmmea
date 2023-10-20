@@ -1,4 +1,4 @@
-scriptVersion="20230405_MMMEA_v3.3";
+scriptVersion="20231020_MMMEA_v3.31";
 
 //tested on ImageJ version 1.53o
 
@@ -91,6 +91,10 @@ scriptVersion="20230405_MMMEA_v3.3";
 //fixed the standardize ROI naming section to remove NaN values generated when using a Z projection
 //20230405_MMMEA_v3.3
 //really fixed the standardize ROI naming section when using a Z projection
+//20231020_MMMEA_v3.31
+//fixed a typo in addEZ function that made it so that if you used the MaximaFinder to threshold the first channel, it broke.
+
+
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---settings---
@@ -3317,7 +3321,7 @@ function secEZ(addch1, addch2, addEZmeth1, addthreshMeth1, addprominence1, addEZ
 		//change the pixel value of positive pixels to 1 to allow to keep RAW pixel Int. values of positive pixels
 		run("Divide...", "value=255.000 stack");
 		//multiply the RAW image with the "Find Maxima" image
-		imageCalculator("Multiply create stack", "addRAW1","addMaxima");
+		imageCalculator("Multiply create stack", "addRAW1","addMaxima1");
 
 		//close unnecessary images
 		selectWindow("addRAW1");
