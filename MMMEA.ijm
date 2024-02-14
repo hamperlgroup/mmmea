@@ -1418,7 +1418,8 @@ for (k = 0; k < numberOfFiles; k++) {
 					selectWindow("nFocus");
 					close();
 					selectWindow("Hyperstack");
-					run("Z Project...", "projection=[Max Intensity]");					
+					run("Z Project...", "projection=[Max Intensity]");
+					
 					rename("nFocus");
 					nFocus = 1;
 					if (proj) {
@@ -1578,7 +1579,8 @@ for (k = 0; k < numberOfFiles; k++) {
 // verify if there is at least 1 ROI
 // ---------------------------------
 
-				run("Select None");
+
+				run("Select None");
 				nROIs = roiManager("count");
 
 				//if no ROIs were detected, take note of the image in the log.-csv file and skip the image
@@ -1590,7 +1592,8 @@ for (k = 0; k < numberOfFiles; k++) {
 // save ROIs pre-filter
 // --------------------
 
-					run("Select None");
+
+					run("Select None");
 					//if the option was selected, save an image of the ROIs and save the ROI.zip file to access the ROI manager
 					//useful to troubleshoot filtering
 					if(ROIprezip) {
@@ -1633,7 +1636,8 @@ for (k = 0; k < numberOfFiles; k++) {
 							ROIsizefilter(ROIminarea, ROImaxarea);
 						}
 
-					
+
+					
 					if (IntDenFilterChoice) {
 						run("Select None");
 						nROIs = roiManager("count");
@@ -1772,7 +1776,8 @@ for (k = 0; k < numberOfFiles; k++) {
 										PreviousSlice = getResult("Slice");
 										//initialize the cell numbering at 0
 										cell = 0;
-		
+
+		
 										for (i = 0; i < nROIs; i ++) {
 											//Get the Zplane of the ROI
 											roiManager("Select", i);
@@ -1809,7 +1814,8 @@ for (k = 0; k < numberOfFiles; k++) {
 							//save the ROImanager
 							roiManager("Save", ROIzipDir+imgName+"_RoiSet.zip");
 
-// ------------------------------------
+
+// ------------------------------------
 // Measure standard parameters per ROIs
 // ------------------------------------
 
@@ -1844,6 +1850,11 @@ for (k = 0; k < numberOfFiles; k++) {
 										headline = headline+",c"+addch2+"_c"+addch1+"_TOS(linear)"+",c"+addch2+"_c"+addch1+"_TOS(log2)"+",c"+addch2+"_c"+addch1+"_PCC"+",c"+addch2+"_c"+addch1+"_SRCC"+",c"+addch2+"_c"+addch1+"_ICQ"+",c"+addch2+"_c"+addch1+"_M1"+",c"+addch2+"_c"+addch1+"_M2";
 									}
 								}
+								
+								//Add name for column that will hold halo measurement at the end of headline
+								//Halo measurement will be used for S-phase classification, later
+								//TODO: Make this optional and fetch channel option from user interface
+								headline += ",halo_measurement";
 
 								//write headline into results.txt
 								print(results,headline);
@@ -2056,6 +2067,73 @@ for (k = 0; k < numberOfFiles; k++) {
 									}
 								}
 
+// -----------------------------------------
+// Halo measurement; used for S-phase ident.
+// -----------------------------------------
+
+								//TODO: Make this measurement optional and put choice in user interface
+								halo = 1;
+								if (halo) {
+
+									//Duplicate channel of interest
+									//run("Duplicate...", "title=c_halo channels=2");
+									//Better, just select channel:
+									Stack.setChannel(2);
+									
+									//StarDist ROI identification not good enough, needs to be retrained
+									//A lot of background is included in the measurement, since ROI is too wide!
+									//TODO: Retrain StarDist, or find alternative!
+									// Shrink current ROI by 5 pixel
+									run("Enlarge...", "enlarge=-5 pixel");
+									roiManager("update");
+
+									//Clear Results window
+									run("Clear Results");
+									//Measure
+									run("Measure");
+									//Get Mean
+									mean1 = getResult("Mean");
+
+									// Shrink current ROI by another 5 pixel
+									run("Enlarge...", "enlarge=-5 pixel");
+									roiManager("update");
+
+									//Measure again
+									//Clear Results window
+									run("Clear Results");
+									//Measure
+									run("Measure");
+									//Get Mean
+									mean2 = getResult("Mean");
+
+									//Store measurement in halo_measurement
+									halo_measurement = mean1 - mean2;
+									
+									//Cannot use loop below, since this would shrink all ROIs at once, but I am in a by ROI loop right now.
+									//n = roiManager("count");
+									//for (i = 0; i < n; i++) {
+									//	roiManager("select", i);
+									//	run("Enlarge...", "enlarge=-10 pixel");
+									//	roiManager("update")//Replaces the selected ROI on the list with the current selection.
+									//	roiManager("select", i);
+									//	roiManager("Measure");
+									//}
+
+									//Increase current ROI by 10 pixel
+									//This effectively reverses changes made to the ROI, I hope :P
+									//Turns out it does not. There is a discrepancy that turns this loop in a random number generator,
+									//if run again over the same ROI. 
+									//Current solution: Don't care. Reverting enlarge in two steps gives sufficient enough results.
+									//Put this measurement at the end of the by ROI loop, so currently now other part of the script is using this ROI afterwards
+									//Except for drawing it on the montage output, and for this purpose this is fine :)
+									//ROI definition by StarDist anyway catches some bg, this is a problem!
+									run("Enlarge...", "enlarge=5 pixel");
+									roiManager("update");
+									run("Enlarge...", "enlarge=5 pixel");
+									roiManager("update");
+									
+								}
+								
 // ----------------------
 // write into results.txt
 // ----------------------
@@ -2095,8 +2173,11 @@ for (k = 0; k < numberOfFiles; k++) {
 										resString4 = resString4+","+addch2addch1TOSlin+","+addch2addch1TOSlog+","+addch2addch1PCC+","+addch2addch1SRCC+","+addch2addch1ICQ+","+addch2addch1M1+","+addch2addch1M2;
 									}
 									//concatenate Coloc parameters with resString
-									resString = resString+resString4;
+									resString = resString+resString4+halo_measurement;
 								}
+								
+								//Add halo_measurment at the end of line
+								resString += ","+halo_measurement;
 
 								// append measurements to results.txt
 								File.append(ExpIdent+","+imgName+","+ROIName+","+Z+","+C+resString, resultsFilePath);
@@ -2806,7 +2887,8 @@ function stardist(probThresh, overlapThresh, pathToStardistModel, starexclude){
 
 //save ROIs as an image in which each ROI have a different color
 function coloredROIimage() {
-	
+
+	
 	n = roiManager("count");
 	selectWindow("nFocus");
     w=getWidth();	
@@ -3648,4 +3730,4 @@ function pngtile(colorChoices,colorArray,MontageMinArray,MontageMaxArray,pngtile
 	//save montage in pngDir
 	selectImage("Montage");
 	saveAs("png", pngDir+imgName+"_montage");
-}
+}
